@@ -10,68 +10,62 @@ def scrape_omdb_site():
     apikey = 'a8e7ab1f'
     baseurl = 'https://www.omdbapi.com/?i='
     extension = "&apikey="
-    df_list = []
-    header = ['Title','Year','Rated','Released','Runtime','Genre','Director','Writer','Actors'
-              ,'Plot','Language','Country','Awards','Poster',"All Ratings",'Internet Movie Database'
-              ,'Rotten Tomatoes','Metacritic','Metascore','imdbRating','imdbVotes','imdbID'
-              ,'Type','DVD','BoxOffice','Production','Website','Response']
-    
-    #Read in list of valid tt id's
-    ttid_list = TT_file_read()
 
+    #Read in list of valid tt id's
+    df = TT_file_read()
+    
     #loop through all tt id's and pull data from the api
-    for i in ttid_list:
-       weburl = baseurl + i + extension + apikey
+    for index, row in df.iterrows():
+       ttid = row['imdbID']
+       weburl = baseurl + ttid + extension + apikey
        response = requests.get(weburl)
        soup = str(bsoup(response.text , 'html.parser'))
        soup = soup.strip('[]')
-       soup = soup.replace('\\"', '"')
+       
         
        data_list = json.loads(soup)
-       title = data_list.get("Title")
-       year = data_list.get('Year')
-       Rated = data_list.get("Rated")
-       Released = data_list.get("Released")
-       Runtime = data_list.get("Runtime")
-       Genre = data_list.get("Genre")
-       Director = data_list.get("Director")
-       Writer = data_list.get("Writer")
-       Actors = data_list.get("Actors")
-       Plot = data_list.get("Plot")
-       Language = data_list.get("Language")
-       Country = data_list.get("Country")
-       Awards = data_list.get("Awards")
-       Poster = data_list.get("Poster")
+       df.at[index,'omdb title'] = data_list.get("Title")
+       df.at[index,'year'] = data_list.get('Year')
+       df.at[index,'Rated'] = data_list.get("Rated")
+       df.at[index,'Released'] = data_list.get("Released")
+       df.at[index,'Runtime'] = data_list.get("Runtime")
+       df.at[index,'Genre'] = data_list.get("Genre")
+       df.at[index,'Director'] = data_list.get("Director")
+       df.at[index,'Writer'] = data_list.get("Writer")
+       df.at[index,'Actors'] = data_list.get("Actors")
+       df.at[index,'Plot'] = data_list.get("Plot")
+       df.at[index,'Language'] = data_list.get("Language")
+       df.at[index,'Country'] = data_list.get("Country")
+       df.at[index,'Awards'] = data_list.get("Awards")
+       df.at[index,'Poster'] = data_list.get("Poster")
        Ratings = data_list.get("Ratings")
-       Metascore = data_list.get("Metascore")
-       imdbRating = data_list.get("imdbRating")
-       imdbVotes = data_list.get("imdbVotes")
-       imdbID = data_list.get("imdbID")
-       Type = data_list.get("Type")
-       DVD = data_list.get("DVD")
-       BoxOffice = data_list.get("BoxOffice")
-       Production = data_list.get("Production")
-       Website = data_list.get("Website")
-       Response = data_list.get("Response")
+    
        
-       Ratings_IMDB = np.nan 
-       Ratings_Rotten = np.nan
-       Ratings_Metacritic = np.nan
+       df.at[index,'Ratings_IMDB'] = np.nan 
+       df.at[index,'Ratings_Rotten'] = np.nan
+       df.at[index,'Ratings_Metacritic'] = np.nan
         
+
        #Loop through rating column to extract the specific data. Set to NA if no data is found 
        for i in range(0,len(Ratings)):
            if Ratings[i].get("Source") == "Internet Movie Database":
-               Ratings_IMDB = Ratings[i].get("Value")
+               df.at[index,'Ratings_IMDB'] = Ratings[i].get("Value")
            if  Ratings[i].get("Source") == "Rotten Tomatoes":
-               Ratings_Rotten = Ratings[i].get("Value")  
+               df.at[index,'Ratings_Rotten'] = Ratings[i].get("Value")  
            if  Ratings[i].get("Source") == "Metacritic":
-               Ratings_Metacritic = Ratings[i].get("Value")  
+               df.at[index,'Ratings_Metacritic'] = Ratings[i].get("Value")  
        
-       df_list += [[title,year,Rated, Released, Runtime, Genre, Director, Writer, Actors, Plot, Language
-                     , Country, Awards, Poster, Ratings, Ratings_IMDB, Ratings_Rotten, Ratings_Metacritic
-                     , Metascore, imdbRating, imdbVotes, imdbID, Type, DVD, BoxOffice, Production, Website, Response]] 
-
-    df = pd.DataFrame(df_list, columns=header)            
+       df.at[index,'Metascore'] = data_list.get("Metascore")
+       df.at[index,'imdbRating'] = data_list.get("imdbRating")
+       df.at[index,'imdbVotes'] = data_list.get("imdbVotes")
+       df.at[index,'imdbID'] = data_list.get("imdbID")
+       df.at[index,'Type'] = data_list.get("Type")
+       df.at[index,'DVD'] = data_list.get("DVD")
+       df.at[index,'BoxOffice'] = data_list.get("BoxOffice")
+       df.at[index,'Production'] = data_list.get("Production")
+       df.at[index,'Website'] = data_list.get("Website")
+       df.at[index,'Response'] = data_list.get("Response")           
+                 
     
     #Output data to csv
     df.to_csv("OMDB API Data.csv", index=False)
@@ -82,8 +76,8 @@ def TT_file_read():
     Returns:
         Dataframe: One column of pandas dataframe which has the valid tt values in it
     """
-    df = pd.read_csv('BOM Data.csv')
-    return df['TT Value']
+    df = pd.read_csv('TMDB API Data Small.csv')
+    return df
 
 if __name__ == '__main__':
     scrape_omdb_site()
