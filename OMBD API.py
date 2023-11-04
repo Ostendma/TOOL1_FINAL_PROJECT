@@ -7,7 +7,7 @@ import pandas as pd
 def scrape_omdb_site():
     """Goes to omdbi api and returns all the values into a csv. Splits out ratings into seperate columns 
     """
-    apikey = 'a8e7ab1f'
+    apikey = '45eaa43a'
     baseurl = 'https://www.omdbapi.com/?i='
     extension = "&apikey="
 
