@@ -76,7 +76,7 @@ def TT_file_read():
     Returns:
         Dataframe: One column of pandas dataframe which has the valid tt values in it
     """
-    df = pd.read_csv('TMDB API Data Small.csv')
+    df = pd.read_csv('TMDB API Data Final.csv')
     return df
 
 if __name__ == '__main__':
